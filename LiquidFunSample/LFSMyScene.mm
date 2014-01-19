@@ -9,6 +9,8 @@
 #include <Box2D/Box2d.h>
 #import "LFSMyScene.h"
 
+const int SCALE = 32;
+
 @interface LFSMyScene () {
     b2World* _world;
 }
@@ -25,6 +27,19 @@
         // Creating a World
         b2Vec2 gravity(0.0f, -10.0f);
         _world = new b2World(gravity);
+        
+        // Creating a ground box
+        CGSize s = UIScreen.mainScreen.bounds.size;
+        
+        b2BodyDef groundBodyDef;
+        groundBodyDef.position.Set(s.width / SCALE / 2, -10.0f);
+        
+        b2Body* groundBody = _world->CreateBody(&groundBodyDef);
+        
+        b2PolygonShape groundBox;
+        groundBox.SetAsBox(s.width / SCALE / 2, 10.0f);
+        
+        groundBody->CreateFixture(&groundBox, 0.0f);
     }
     return self;
 }
