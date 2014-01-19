@@ -6,7 +6,13 @@
 //  Copyright (c) 2014年 Safx Developers. All rights reserved.
 //
 
+#include <Box2D/Box2d.h>
 #import "LFSMyScene.h"
+
+@interface LFSMyScene () {
+    b2World* _world;
+}
+@end
 
 @implementation LFSMyScene
 
@@ -16,8 +22,15 @@
         
         self.backgroundColor = [SKColor colorWithRed:0.15 green:0.15 blue:0.3 alpha:1.0];
         
+        // Creating a World
+        b2Vec2 gravity(0.0f, -10.0f);
+        _world = new b2World(gravity);
     }
     return self;
+}
+
+-(void)dealloc {
+    delete _world;
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
