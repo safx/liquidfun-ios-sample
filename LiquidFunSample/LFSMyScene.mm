@@ -6,7 +6,6 @@
 //  Copyright (c) 2014年 Safx Developers. All rights reserved.
 //
 
-#include <deque>
 #include <Box2D/Box2d.h>
 #import "LFSMyScene.h"
 
@@ -14,7 +13,6 @@ const float DISPLAY_SCALE = 32.0;
 
 @interface LFSMyScene () {
     b2World* _world;
-    std::deque<b2Body*> _bodies;
 }
 @end
 
@@ -77,7 +75,6 @@ const float DISPLAY_SCALE = 32.0;
         body->CreateFixture(&fixtureDef);
         
         body->SetUserData((__bridge void*) node);
-        _bodies.push_back(body);
     }
 }
 
@@ -90,14 +87,15 @@ const float DISPLAY_SCALE = 32.0;
     const int32 positionIterations = 2;
     
     _world->Step(timeStep, velocityIterations, positionIterations);
-    for_each(begin(_bodies), end(_bodies), [](b2Body* body) {
+    
+    for (b2Body* body = _world->GetBodyList(); body != nullptr; body = body->GetNext()) {
         const b2Vec2 position = body->GetPosition();
         const float32 angle = body->GetAngle();
         
         SKSpriteNode* sprite = (__bridge SKSpriteNode*) body->GetUserData();
         sprite.position = CGPointMake(position.x * DISPLAY_SCALE, position.y * DISPLAY_SCALE);
         sprite.zRotation = angle;
-    });
+    }
 }
 
 @end
