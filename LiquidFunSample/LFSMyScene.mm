@@ -55,7 +55,7 @@ const float DISPLAY_SCALE = 32.0;
         CGPoint location = [touch locationInNode:self];
         CGSize size = CGSizeMake(32, 32);
         
-        SKSpriteNode *node = [SKSpriteNode spriteNodeWithColor:UIColor.whiteColor size:size];
+        SKNode *node = [SKSpriteNode spriteNodeWithColor:UIColor.whiteColor size:size];
         node.position = location;
         [self addChild:node];
         
@@ -92,12 +92,12 @@ const float DISPLAY_SCALE = 32.0;
         const b2Vec2 position = body->GetPosition();
         const float32 angle = body->GetAngle();
         
-        SKSpriteNode* sprite = (__bridge SKSpriteNode*) body->GetUserData();
+        SKNode* node = (__bridge SKNode*) body->GetUserData();
         if (position.y >= 0) {
-            sprite.position = CGPointMake(position.x * DISPLAY_SCALE, position.y * DISPLAY_SCALE);
-            sprite.zRotation = angle;
-        } else if (sprite) {
-            [sprite removeFromParent];
+            node.position = CGPointMake(position.x * DISPLAY_SCALE, position.y * DISPLAY_SCALE);
+            node.zRotation = angle;
+        } else if (node) {
+            [node removeFromParent];
             _world->DestroyBody(body);
         }
         body = next;
