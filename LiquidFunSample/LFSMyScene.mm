@@ -83,6 +83,21 @@ const int SCALE = 32;
 
 -(void)update:(CFTimeInterval)currentTime {
     /* Called before each frame is rendered */
+    using namespace std;
+    
+    const float32 timeStep = 1.0f / 60.0f;
+    const int32 velocityIterations = 6;
+    const int32 positionIterations = 2;
+    
+    _world->Step(timeStep, velocityIterations, positionIterations);
+    for_each(begin(_bodies), end(_bodies), [](b2Body* body) {
+        const b2Vec2 position = body->GetPosition();
+        const float32 angle = body->GetAngle();
+        
+        SKSpriteNode* sprite = (__bridge SKSpriteNode*) body->GetUserData();
+        sprite.position = CGPointMake(position.x * SCALE, position.y * SCALE);
+        sprite.zRotation = angle;
+    });
 }
 
 @end
