@@ -6,6 +6,7 @@
 //  Copyright (c) 2014年 Safx Developers. All rights reserved.
 //
 
+#include <deque>
 #include <Box2D/Box2d.h>
 #import "LFSMyScene.h"
 
@@ -13,6 +14,7 @@ const int SCALE = 32;
 
 @interface LFSMyScene () {
     b2World* _world;
+    std::deque<b2Body*> _bodies;
 }
 @end
 
@@ -57,8 +59,25 @@ const int SCALE = 32;
         
         SKSpriteNode *node = [SKSpriteNode spriteNodeWithColor:UIColor.whiteColor size:size];
         node.position = location;
-        
         [self addChild:node];
+        
+        b2BodyDef bodyDef;
+        bodyDef.type = b2_dynamicBody;
+        bodyDef.position.Set(location.x / SCALE, location.y / SCALE);
+        b2Body* body = _world->CreateBody(&bodyDef);
+        
+        b2PolygonShape dynamicBox;
+        dynamicBox.SetAsBox(size.width / SCALE / 2, size.height / SCALE / 2);
+        
+        b2FixtureDef fixtureDef;
+        fixtureDef.shape = &dynamicBox;
+        fixtureDef.density = 1.0f;
+        fixtureDef.friction = 0.3f;
+        fixtureDef.restitution = 0.8f;
+        body->CreateFixture(&fixtureDef);
+        
+        body->SetUserData((__bridge void*) node);
+        _bodies.push_back(body);
     }
 }
 
