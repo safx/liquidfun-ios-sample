@@ -79,10 +79,32 @@ const float DISPLAY_SCALE = 32.0;
         body->SetUserData((__bridge void*) node);
     };
     
+    static UIBezierPath* ovalPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-16, -16, 32, 32)];
+    static b2CircleShape ballShape;
+    ballShape.m_radius = 32 / DISPLAY_SCALE / 2;
+    auto addBall = [self,createBody,createFixtureWithValues](CGPoint& pos) {
+        SKShapeNode* node = SKShapeNode.alloc.init;
+        node.path = ovalPath.CGPath;
+        node.fillColor = UIColor.whiteColor;
+        node.lineWidth = 0;
+        node.position = pos;
+        [self addChild:node];
+        
+        b2Body* body = createBody(pos);
+        createFixtureWithValues(body, &ballShape, 1.0f, 0.3f, 0.4f);
+        body->SetUserData((__bridge void*) node);
+    };
+    
+    static int count = 0;
+
     for (UITouch *touch in touches) {
         CGPoint location = [touch locationInNode:self];
-        addBox(location);
+        switch (count % 2) {
+            case 0: addBox(location); break;
+            case 1: addBall(location); break;
+        }
     }
+    ++count;
 }
 
 -(void)update:(CFTimeInterval)currentTime {
