@@ -95,13 +95,32 @@ const float DISPLAY_SCALE = 32.0;
         body->SetUserData((__bridge void*) node);
     };
     
+    static UIBezierPath* ovalPath2 = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-4, -4, 8, 8)];
+    auto addWater = [self](CGPoint& pos) {
+        b2ParticleGroupDef groupDef;
+        groupDef.shape = &ballShape;
+        groupDef.flags = b2_tensileParticle;
+        groupDef.position.Set(pos.x / DISPLAY_SCALE, pos.y / DISPLAY_SCALE);
+        b2ParticleGroup* group = _world->CreateParticleGroup(groupDef);
+        
+        for (size_t i = 0; i < group->GetParticleCount(); ++i) {
+            SKShapeNode* node = SKShapeNode.alloc.init;
+            node.path = ovalPath2.CGPath;
+            node.fillColor = UIColor.blueColor;
+            node.lineWidth = 0;
+            node.position = pos;
+            [self addChild:node];
+        }
+    };
+    
     static int count = 0;
 
     for (UITouch *touch in touches) {
         CGPoint location = [touch locationInNode:self];
-        switch (count % 2) {
+        switch (count % 3) {
             case 0: addBox(location); break;
             case 1: addBall(location); break;
+            case 2: addWater(location); break;
         }
     }
     ++count;
