@@ -6,6 +6,7 @@
 //  Copyright (c) 2014年 Safx Developers. All rights reserved.
 //
 
+#include <vector>
 #include <Box2D/Box2d.h>
 #import "LFSMyScene.h"
 
@@ -13,6 +14,7 @@ const float DISPLAY_SCALE = 32.0;
 
 @interface LFSMyScene () {
     b2World* _world;
+    std::vector<SKNode*> _water;
 }
 @end
 
@@ -28,6 +30,8 @@ const float DISPLAY_SCALE = 32.0;
         b2Vec2 gravity(0.0f, -10.0f);
         _world = new b2World(gravity);
         
+        _world->SetParticleRadius(1.0 / 8);
+
         // Creating a ground box
         CGSize s = UIScreen.mainScreen.bounds.size;
         
@@ -95,13 +99,34 @@ const float DISPLAY_SCALE = 32.0;
         body->SetUserData((__bridge void*) node);
     };
     
+    static UIBezierPath* ovalPath2 = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-4, -4, 8, 8)];
+    auto addWater = [self](CGPoint& pos) {
+        b2ParticleGroupDef groupDef;
+        groupDef.shape = &ballShape;
+        groupDef.flags = b2_tensileParticle;
+        groupDef.position.Set(pos.x / DISPLAY_SCALE, pos.y / DISPLAY_SCALE);
+        b2ParticleGroup* group = _world->CreateParticleGroup(groupDef);
+        
+        for (size_t i = 0; i < group->GetParticleCount(); ++i) {
+            SKShapeNode* node = SKShapeNode.alloc.init;
+            node.path = ovalPath2.CGPath;
+            node.fillColor = UIColor.blueColor;
+            node.lineWidth = 0;
+            node.position = pos;
+            [self addChild:node];
+            
+            _water.push_back(node);
+        }
+    };
+    
     static int count = 0;
 
     for (UITouch *touch in touches) {
         CGPoint location = [touch locationInNode:self];
-        switch (count % 2) {
+        switch (count % 3) {
             case 0: addBox(location); break;
             case 1: addBall(location); break;
+            case 2: addWater(location); break;
         }
     }
     ++count;
@@ -131,6 +156,24 @@ const float DISPLAY_SCALE = 32.0;
         }
         body = next;
     }
+
+    using namespace std;
+    
+    b2Vec2* v = _world->GetParticlePositionBuffer();
+    int i = 0;
+    auto it = remove_if(begin(_water), end(_water), [self, &v, &i](SKNode* node){
+        const bool is_remove = v->y < 0;
+        if (is_remove) {
+            _world->DestroyParticle(i);
+            [node removeFromParent];
+        } else {
+            node.position = CGPointMake(v->x * DISPLAY_SCALE, v->y * DISPLAY_SCALE);
+        }
+        ++i;
+        ++v;
+        return is_remove;
+    });
+    _water.erase(it, end(_water));
 }
 
 @end
