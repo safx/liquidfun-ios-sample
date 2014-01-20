@@ -134,7 +134,11 @@ const float DISPLAY_SCALE = 32.0;
 
 -(void)update:(CFTimeInterval)currentTime {
     /* Called before each frame is rendered */
-    const float32 timeStep = 1.0f / 60.0f;
+    static CFTimeInterval previousTime = 0;
+    double duration = currentTime - previousTime;
+    previousTime = currentTime;
+    
+    const float32 timeStep = duration;
     const int32 velocityIterations = 6;
     const int32 positionIterations = 2;
     
