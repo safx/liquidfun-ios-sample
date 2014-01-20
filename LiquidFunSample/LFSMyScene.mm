@@ -160,10 +160,20 @@ const float DISPLAY_SCALE = 32.0;
     using namespace std;
     
     b2Vec2* v = _world->GetParticlePositionBuffer();
-    for_each(begin(_water), end(_water), [&v](SKNode* node){
-        node.position = CGPointMake(v->x * DISPLAY_SCALE, v->y * DISPLAY_SCALE);
+    int i = 0;
+    auto it = remove_if(begin(_water), end(_water), [self, &v, &i](SKNode* node){
+        const bool is_remove = v->y < 0;
+        if (is_remove) {
+            _world->DestroyParticle(i);
+            [node removeFromParent];
+        } else {
+            node.position = CGPointMake(v->x * DISPLAY_SCALE, v->y * DISPLAY_SCALE);
+        }
+        ++i;
         ++v;
+        return is_remove;
     });
+    _water.erase(it, end(_water));
 }
 
 @end
