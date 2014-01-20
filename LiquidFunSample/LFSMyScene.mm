@@ -6,6 +6,7 @@
 //  Copyright (c) 2014年 Safx Developers. All rights reserved.
 //
 
+#include <vector>
 #include <Box2D/Box2d.h>
 #import "LFSMyScene.h"
 
@@ -13,6 +14,7 @@ const float DISPLAY_SCALE = 32.0;
 
 @interface LFSMyScene () {
     b2World* _world;
+    std::vector<SKNode*> _water;
 }
 @end
 
@@ -28,6 +30,8 @@ const float DISPLAY_SCALE = 32.0;
         b2Vec2 gravity(0.0f, -10.0f);
         _world = new b2World(gravity);
         
+        _world->SetParticleRadius(1.0 / 8);
+
         // Creating a ground box
         CGSize s = UIScreen.mainScreen.bounds.size;
         
@@ -110,6 +114,8 @@ const float DISPLAY_SCALE = 32.0;
             node.lineWidth = 0;
             node.position = pos;
             [self addChild:node];
+            
+            _water.push_back(node);
         }
     };
     
@@ -150,6 +156,14 @@ const float DISPLAY_SCALE = 32.0;
         }
         body = next;
     }
+
+    using namespace std;
+    
+    b2Vec2* v = _world->GetParticlePositionBuffer();
+    for_each(begin(_water), end(_water), [&v](SKNode* node){
+        node.position = CGPointMake(v->x * DISPLAY_SCALE, v->y * DISPLAY_SCALE);
+        ++v;
+    });
 }
 
 @end
