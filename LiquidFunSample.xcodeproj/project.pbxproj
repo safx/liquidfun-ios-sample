@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8D663DE6188D36920061EB60 /* water.sks in Resources */ = {isa = PBXBuildFile; fileRef = 8D663DE4188D36920061EB60 /* water.sks */; };
+		8D663DE7188D36920061EB60 /* spark.png in Resources */ = {isa = PBXBuildFile; fileRef = 8D663DE5188D36920061EB60 /* spark.png */; };
 		8D964B06188B7B1E004DFAC5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D964B05188B7B1E004DFAC5 /* Foundation.framework */; };
 		8D964B08188B7B1E004DFAC5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D964B07188B7B1E004DFAC5 /* CoreGraphics.framework */; };
 		8D964B0A188B7B1E004DFAC5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D964B09188B7B1E004DFAC5 /* UIKit.framework */; };
@@ -141,6 +143,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8D663DE4188D36920061EB60 /* water.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = water.sks; sourceTree = "<group>"; };
+		8D663DE5188D36920061EB60 /* spark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = spark.png; sourceTree = "<group>"; };
 		8D964B02188B7B1E004DFAC5 /* LiquidFunSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LiquidFunSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D964B05188B7B1E004DFAC5 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		8D964B07188B7B1E004DFAC5 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -390,6 +394,8 @@
 				8D964B20188B7B1E004DFAC5 /* LFSViewController.m */,
 				8D964B22188B7B1E004DFAC5 /* LFSMyScene.h */,
 				8D964B23188B7B1E004DFAC5 /* LFSMyScene.mm */,
+				8D663DE4188D36920061EB60 /* water.sks */,
+				8D663DE5188D36920061EB60 /* spark.png */,
 				8D964B25188B7B1E004DFAC5 /* Spaceship.png */,
 				8D964B27188B7B1E004DFAC5 /* Images.xcassets */,
 				8D964B0E188B7B1E004DFAC5 /* Supporting Files */,
@@ -772,6 +778,7 @@
 			files = (
 				8DF4DDFF188B7BF200BB4C42 /* image_12.png in Resources */,
 				8DF4DDF9188B7BF200BB4C42 /* Chapter15_References.md in Resources */,
+				8D663DE7188D36920061EB60 /* spark.png in Resources */,
 				8DF4DDED188B7BF200BB4C42 /* Chapter03_Common.md in Resources */,
 				8DF4DE02188B7BF200BB4C42 /* image_15.png in Resources */,
 				8DF4DDFC188B7BF200BB4C42 /* image_1.png in Resources */,
@@ -799,6 +806,7 @@
 				8D964B1E188B7B1E004DFAC5 /* Main_iPad.storyboard in Resources */,
 				8D964B1B188B7B1E004DFAC5 /* Main_iPhone.storyboard in Resources */,
 				8DF4DE09188B7BF200BB4C42 /* image_21.gif in Resources */,
+				8D663DE6188D36920061EB60 /* water.sks in Resources */,
 				8DF4DDFB188B7BF200BB4C42 /* image_0.png in Resources */,
 				8DF4DDFD188B7BF200BB4C42 /* image_10.png in Resources */,
 				8DF4DDE9188B7BF200BB4C42 /* doxyfile in Resources */,

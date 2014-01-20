@@ -102,7 +102,6 @@ const float DISPLAY_SCALE = 32.0;
         body->SetUserData((__bridge void*) node);
     };
     
-    static UIBezierPath* ovalPath2 = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-4, -4, 8, 8)];
     auto addWater = [self](const CGPoint& pos) {
         b2CircleShape ballShape;
         ballShape.m_radius = 32 / DISPLAY_SCALE / 2;
@@ -114,10 +113,8 @@ const float DISPLAY_SCALE = 32.0;
         b2ParticleGroup* group = _world->CreateParticleGroup(groupDef);
         
         for (size_t i = 0; i < group->GetParticleCount(); ++i) {
-            SKShapeNode* node = SKShapeNode.alloc.init;
-            node.path = ovalPath2.CGPath;
-            node.fillColor = UIColor.blueColor;
-            node.lineWidth = 0;
+            SKEmitterNode* node = [NSKeyedUnarchiver unarchiveObjectWithFile:[NSBundle.mainBundle pathForResource:@"water" ofType:@"sks"]];
+
             node.position = pos;
             [self addChild:node];
             
