@@ -71,23 +71,25 @@ const float DISPLAY_SCALE = 32.0;
         return _world->CreateBody(&bodyDef);
     };
     
-    const static CGSize boxsize = CGSizeMake(32, 32);
-    static b2PolygonShape boxShape;
-    boxShape.SetAsBox(boxsize.width / DISPLAY_SCALE / 2, boxsize.height / DISPLAY_SCALE / 2);
-    auto addBox = [self,createBody,createFixtureWithValues](const CGPoint& pos) {
-        SKSpriteNode* node = [SKSpriteNode spriteNodeWithColor:UIColor.whiteColor size:boxsize];
+    auto addBox = [self,createBody,createFixtureWithValues](const CGPoint& pos, const CGSize& size) {
+        b2PolygonShape boxShape;
+        boxShape.SetAsBox(size.width / 2, size.height / 2);
+
+        SKSpriteNode* node = [SKSpriteNode spriteNodeWithColor:UIColor.whiteColor size:CGSizeMake(size.width * DISPLAY_SCALE, size.height * DISPLAY_SCALE)];
         node.position = pos;
         [self addChild:node];
         
         b2Body* body = createBody(pos);
-        createFixtureWithValues(body, &boxShape, 1.0f, 0.3f, 0.8f);
+        createFixtureWithValues(body, &boxShape, 1.0f, 0.3f, 0.1f);
         body->SetUserData((__bridge void*) node);
     };
     
-    static UIBezierPath* ovalPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-16, -16, 32, 32)];
-    static b2CircleShape ballShape;
-    ballShape.m_radius = 32 / DISPLAY_SCALE / 2;
-    auto addBall = [self,createBody,createFixtureWithValues](const CGPoint& pos) {
+    auto addBall = [self,createBody,createFixtureWithValues](const CGPoint& pos, float radius) {
+        const float r = radius * DISPLAY_SCALE;
+        UIBezierPath* ovalPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-r, -r, r*2, r*2)];
+        b2CircleShape ballShape;
+        ballShape.m_radius = radius;
+
         SKShapeNode* node = SKShapeNode.alloc.init;
         node.path = ovalPath.CGPath;
         node.fillColor = UIColor.whiteColor;
@@ -102,6 +104,9 @@ const float DISPLAY_SCALE = 32.0;
     
     static UIBezierPath* ovalPath2 = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-4, -4, 8, 8)];
     auto addWater = [self](const CGPoint& pos) {
+        b2CircleShape ballShape;
+        ballShape.m_radius = 32 / DISPLAY_SCALE / 2;
+
         b2ParticleGroupDef groupDef;
         groupDef.shape = &ballShape;
         groupDef.flags = b2_tensileParticle;
@@ -125,8 +130,8 @@ const float DISPLAY_SCALE = 32.0;
     for (UITouch *touch in touches) {
         CGPoint location = [touch locationInNode:self];
         switch (count % 3) {
-            case 0: addBox(location); break;
-            case 1: addBall(location); break;
+            case 0: addBox(location, CGSizeMake(1,1)); break;
+            case 1: addBall(location, 0.5); break;
             case 2: addWater(location); break;
         }
     }
@@ -145,21 +150,13 @@ const float DISPLAY_SCALE = 32.0;
     
     _world->Step(timeStep, velocityIterations, positionIterations);
     
-    for (b2Body* body = _world->GetBodyList(); body != nullptr;) {
-        b2Body* next = body->GetNext();
-        
+    for (b2Body* body = _world->GetBodyList(); body != nullptr; body = body->GetNext()) {
         const b2Vec2 position = body->GetPosition();
         const float32 angle = body->GetAngle();
         
         SKNode* node = (__bridge SKNode*) body->GetUserData();
-        if (position.y >= 0) {
-            node.position = CGPointMake(position.x * DISPLAY_SCALE, position.y * DISPLAY_SCALE);
-            node.zRotation = angle;
-        } else if (node) {
-            [node removeFromParent];
-            _world->DestroyBody(body);
-        }
-        body = next;
+        node.position = CGPointMake(position.x * DISPLAY_SCALE, position.y * DISPLAY_SCALE);
+        node.zRotation = angle;
     }
 
     using namespace std;
