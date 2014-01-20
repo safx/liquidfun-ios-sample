@@ -50,32 +50,61 @@ const float DISPLAY_SCALE = 32.0;
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     /* Called when a touch begins */
+    const static CGSize boxsize = CGSizeMake(32, 32);
+    static b2PolygonShape boxShape;
+    boxShape.SetAsBox(boxsize.width / DISPLAY_SCALE / 2, boxsize.height / DISPLAY_SCALE / 2);
+    auto createFixtureWithValues = [](b2Body* body, b2Shape* shape, float density, float friction, float restitution) {
+        b2FixtureDef def;
+        def.shape = shape;
+        def.density = density;
+        def.friction = friction;
+        def.restitution = restitution;
+        body->CreateFixture(&def);
+    };
     
-    for (UITouch *touch in touches) {
-        CGPoint location = [touch locationInNode:self];
-        CGSize size = CGSizeMake(32, 32);
-        
-        SKNode *node = [SKSpriteNode spriteNodeWithColor:UIColor.whiteColor size:size];
-        node.position = location;
-        [self addChild:node];
-        
+    auto createBody = [self](CGPoint& pos) -> b2Body* {
         b2BodyDef bodyDef;
         bodyDef.type = b2_dynamicBody;
-        bodyDef.position.Set(location.x / DISPLAY_SCALE, location.y / DISPLAY_SCALE);
-        b2Body* body = _world->CreateBody(&bodyDef);
+        bodyDef.position.Set(pos.x / DISPLAY_SCALE, pos.y / DISPLAY_SCALE);
+        return _world->CreateBody(&bodyDef);
+    };
+    
+    auto addBox = [self,createBody,createFixtureWithValues](CGPoint& pos) {
+        SKSpriteNode* node = [SKSpriteNode spriteNodeWithColor:UIColor.whiteColor size:boxsize];
+        node.position = pos;
+        [self addChild:node];
         
-        b2PolygonShape dynamicBox;
-        dynamicBox.SetAsBox(size.width / DISPLAY_SCALE / 2, size.height / DISPLAY_SCALE / 2);
-        
-        b2FixtureDef fixtureDef;
-        fixtureDef.shape = &dynamicBox;
-        fixtureDef.density = 1.0f;
-        fixtureDef.friction = 0.3f;
-        fixtureDef.restitution = 0.8f;
-        body->CreateFixture(&fixtureDef);
-        
+        b2Body* body = createBody(pos);
+        createFixtureWithValues(body, &boxShape, 1.0f, 0.3f, 0.8f);
         body->SetUserData((__bridge void*) node);
+    };
+    
+    static UIBezierPath* ovalPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-16, -16, 32, 32)];
+    static b2CircleShape ballShape;
+    ballShape.m_radius = 32 / DISPLAY_SCALE / 2;
+    auto addBall = [self,createBody,createFixtureWithValues](CGPoint& pos) {
+        SKShapeNode* node = SKShapeNode.alloc.init;
+        node.path = ovalPath.CGPath;
+        node.fillColor = UIColor.whiteColor;
+        node.lineWidth = 0;
+        node.position = pos;
+        [self addChild:node];
+        
+        b2Body* body = createBody(pos);
+        createFixtureWithValues(body, &ballShape, 1.0f, 0.3f, 0.4f);
+        body->SetUserData((__bridge void*) node);
+    };
+    
+    static int count = 0;
+
+    for (UITouch *touch in touches) {
+        CGPoint location = [touch locationInNode:self];
+        switch (count % 2) {
+            case 0: addBox(location); break;
+            case 1: addBall(location); break;
+        }
     }
+    ++count;
 }
 
 -(void)update:(CFTimeInterval)currentTime {
