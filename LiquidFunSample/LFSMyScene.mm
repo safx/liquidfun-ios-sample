@@ -54,10 +54,8 @@ const float DISPLAY_SCALE = 32.0;
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     /* Called when a touch begins */
-    const static CGSize boxsize = CGSizeMake(32, 32);
-    static b2PolygonShape boxShape;
-    boxShape.SetAsBox(boxsize.width / DISPLAY_SCALE / 2, boxsize.height / DISPLAY_SCALE / 2);
-    auto createFixtureWithValues = [](b2Body* body, b2Shape* shape, float density, float friction, float restitution) {
+
+    auto createFixtureWithValues = [](b2Body* body, const b2Shape* shape, float density, float friction, float restitution) {
         b2FixtureDef def;
         def.shape = shape;
         def.density = density;
@@ -66,14 +64,17 @@ const float DISPLAY_SCALE = 32.0;
         body->CreateFixture(&def);
     };
     
-    auto createBody = [self](CGPoint& pos) -> b2Body* {
+    auto createBody = [self](const CGPoint& pos) -> b2Body* {
         b2BodyDef bodyDef;
         bodyDef.type = b2_dynamicBody;
         bodyDef.position.Set(pos.x / DISPLAY_SCALE, pos.y / DISPLAY_SCALE);
         return _world->CreateBody(&bodyDef);
     };
     
-    auto addBox = [self,createBody,createFixtureWithValues](CGPoint& pos) {
+    const static CGSize boxsize = CGSizeMake(32, 32);
+    static b2PolygonShape boxShape;
+    boxShape.SetAsBox(boxsize.width / DISPLAY_SCALE / 2, boxsize.height / DISPLAY_SCALE / 2);
+    auto addBox = [self,createBody,createFixtureWithValues](const CGPoint& pos) {
         SKSpriteNode* node = [SKSpriteNode spriteNodeWithColor:UIColor.whiteColor size:boxsize];
         node.position = pos;
         [self addChild:node];
@@ -86,7 +87,7 @@ const float DISPLAY_SCALE = 32.0;
     static UIBezierPath* ovalPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-16, -16, 32, 32)];
     static b2CircleShape ballShape;
     ballShape.m_radius = 32 / DISPLAY_SCALE / 2;
-    auto addBall = [self,createBody,createFixtureWithValues](CGPoint& pos) {
+    auto addBall = [self,createBody,createFixtureWithValues](const CGPoint& pos) {
         SKShapeNode* node = SKShapeNode.alloc.init;
         node.path = ovalPath.CGPath;
         node.fillColor = UIColor.whiteColor;
@@ -100,7 +101,7 @@ const float DISPLAY_SCALE = 32.0;
     };
     
     static UIBezierPath* ovalPath2 = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-4, -4, 8, 8)];
-    auto addWater = [self](CGPoint& pos) {
+    auto addWater = [self](const CGPoint& pos) {
         b2ParticleGroupDef groupDef;
         groupDef.shape = &ballShape;
         groupDef.flags = b2_tensileParticle;
