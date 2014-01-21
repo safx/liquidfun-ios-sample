@@ -64,41 +64,40 @@ const float DISPLAY_SCALE = 32.0;
         body->CreateFixture(&def);
     };
     
-    auto createBody = [self](const CGPoint& pos) -> b2Body* {
+    auto createDynamicBody = [self](const CGPoint& pos) -> b2Body* {
         b2BodyDef bodyDef;
         bodyDef.type = b2_dynamicBody;
         bodyDef.position.Set(pos.x / DISPLAY_SCALE, pos.y / DISPLAY_SCALE);
         return _world->CreateBody(&bodyDef);
     };
     
-    auto addBox = [self,createBody,createFixtureWithValues](const CGPoint& pos, const CGSize& size) {
-        b2PolygonShape boxShape;
-        boxShape.SetAsBox(size.width / 2, size.height / 2);
-
-        SKSpriteNode* node = [SKSpriteNode spriteNodeWithColor:UIColor.whiteColor size:CGSizeMake(size.width * DISPLAY_SCALE, size.height * DISPLAY_SCALE)];
+    auto addBox = [self,createDynamicBody,createFixtureWithValues](const CGPoint& pos, CGFloat width, CGFloat height) {
+        SKSpriteNode* node = [SKSpriteNode spriteNodeWithColor:UIColor.whiteColor size:CGSizeMake(width * DISPLAY_SCALE * 2, height * DISPLAY_SCALE * 2)];
         node.position = pos;
         [self addChild:node];
         
-        b2Body* body = createBody(pos);
-        createFixtureWithValues(body, &boxShape, 1.0f, 0.3f, 0.1f);
+        b2Body* body = createDynamicBody(pos);
+        b2PolygonShape boxShape;
+        boxShape.SetAsBox(width, height);
+        createFixtureWithValues(body, &boxShape, 0.3f, 0.3f, 0.1f);
         body->SetUserData((__bridge void*) node);
     };
     
-    auto addBall = [self,createBody,createFixtureWithValues](const CGPoint& pos, float radius) {
+    auto addBall = [self,createDynamicBody,createFixtureWithValues](const CGPoint& pos, float radius) {
         const float r = radius * DISPLAY_SCALE;
-        UIBezierPath* ovalPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-r, -r, r*2, r*2)];
-        b2CircleShape ballShape;
-        ballShape.m_radius = radius;
 
         SKShapeNode* node = SKShapeNode.alloc.init;
+        UIBezierPath* ovalPath = [UIBezierPath bezierPathWithOvalInRect: CGRectMake(-r, -r, r*2, r*2)];
         node.path = ovalPath.CGPath;
         node.fillColor = UIColor.whiteColor;
         node.lineWidth = 0;
         node.position = pos;
         [self addChild:node];
         
-        b2Body* body = createBody(pos);
-        createFixtureWithValues(body, &ballShape, 1.0f, 0.3f, 0.4f);
+        b2Body* body = createDynamicBody(pos);
+        b2CircleShape ballShape;
+        ballShape.m_radius = radius;
+        createFixtureWithValues(body, &ballShape, 1.0f, 0.8f, 0.8f);
         body->SetUserData((__bridge void*) node);
     };
     
@@ -114,10 +113,8 @@ const float DISPLAY_SCALE = 32.0;
         
         for (size_t i = 0; i < group->GetParticleCount(); ++i) {
             SKEmitterNode* node = [NSKeyedUnarchiver unarchiveObjectWithFile:[NSBundle.mainBundle pathForResource:@"water" ofType:@"sks"]];
-
             node.position = pos;
             [self addChild:node];
-            
             _water.push_back(node);
         }
     };
@@ -127,7 +124,7 @@ const float DISPLAY_SCALE = 32.0;
     for (UITouch *touch in touches) {
         CGPoint location = [touch locationInNode:self];
         switch (count % 3) {
-            case 0: addBox(location, CGSizeMake(1,1)); break;
+            case 0: addBox(location, 0.5f, 0.5f); break;
             case 1: addBall(location, 0.5); break;
             case 2: addWater(location); break;
         }
