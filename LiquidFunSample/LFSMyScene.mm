@@ -14,7 +14,6 @@ const float DISPLAY_SCALE = 32.0;
 
 @interface LFSMyScene () {
     b2World* _world;
-    std::vector<SKNode*> _water;
 }
 @end
 
@@ -113,6 +112,8 @@ const float DISPLAY_SCALE = 32.0;
         groupDef.position.Set(pos.x / DISPLAY_SCALE, pos.y / DISPLAY_SCALE);
         b2ParticleGroup* group = _world->CreateParticleGroup(groupDef);
         
+        int32 offset = group->GetBufferIndex();
+        void** userdata = _world->GetParticleUserDataBuffer() + offset;
         for (size_t i = 0; i < group->GetParticleCount(); ++i) {
             SKShapeNode* node = SKShapeNode.alloc.init;
             node.path = ovalPath2.CGPath;
@@ -121,7 +122,8 @@ const float DISPLAY_SCALE = 32.0;
             node.position = pos;
             [self addChild:node];
             
-            _water.push_back(node);
+            *userdata = (__bridge void*) node;
+            ++userdata;
         }
     };
     
@@ -158,24 +160,20 @@ const float DISPLAY_SCALE = 32.0;
         node.position = CGPointMake(position.x * DISPLAY_SCALE, position.y * DISPLAY_SCALE);
         node.zRotation = angle;
     }
-
-    using namespace std;
     
     b2Vec2* v = _world->GetParticlePositionBuffer();
-    int i = 0;
-    auto it = remove_if(begin(_water), end(_water), [self, &v, &i](SKNode* node){
+    void** userdata = _world->GetParticleUserDataBuffer();
+    uint32* flags = _world->GetParticleFlagsBuffer();
+    for (int i = 0; i < _world->GetParticleCount(); ++i, ++v, ++flags, ++userdata) {
         const bool is_remove = v->y < 0;
+        SKNode* node = (__bridge SKNode*) *userdata;
         if (is_remove) {
-            _world->DestroyParticle(i);
+            *flags |= b2_zombieParticle;
             [node removeFromParent];
         } else {
             node.position = CGPointMake(v->x * DISPLAY_SCALE, v->y * DISPLAY_SCALE);
         }
-        ++i;
-        ++v;
-        return is_remove;
-    });
-    _water.erase(it, end(_water));
+    }
 }
 
 @end
