@@ -13,6 +13,7 @@ const float DISPLAY_SCALE = 32.0;
 
 @interface LFSMyScene () {
     b2World* _world;
+    b2ParticleSystem* _particleSystem;
 }
 @end
 
@@ -28,7 +29,9 @@ const float DISPLAY_SCALE = 32.0;
         b2Vec2 gravity(0.0f, -10.0f);
         _world = new b2World(gravity);
         
-        _world->SetParticleRadius(1.0 / 8);
+        const b2ParticleSystemDef particleSystemDef;
+        _particleSystem = _world->CreateParticleSystem(&particleSystemDef);
+        _particleSystem->SetRadius(1.0 / 8);
 
         // Creating a ground box
         CGSize s = UIScreen.mainScreen.bounds.size;
@@ -107,10 +110,10 @@ const float DISPLAY_SCALE = 32.0;
         groupDef.shape = &ballShape;
         groupDef.flags = b2_tensileParticle;
         groupDef.position.Set(pos.x / DISPLAY_SCALE, pos.y / DISPLAY_SCALE);
-        b2ParticleGroup* group = _world->CreateParticleGroup(groupDef);
+        b2ParticleGroup* group = _particleSystem->CreateParticleGroup(groupDef);
         
         int32 offset = group->GetBufferIndex();
-        void** userdata = _world->GetParticleUserDataBuffer() + offset;
+        void** userdata = _particleSystem->GetUserDataBuffer() + offset;
         for (size_t i = 0; i < group->GetParticleCount(); ++i) {
             SKEmitterNode* node = [NSKeyedUnarchiver unarchiveObjectWithFile:[NSBundle.mainBundle pathForResource:@"water" ofType:@"sks"]];
             node.position = pos;
@@ -154,14 +157,13 @@ const float DISPLAY_SCALE = 32.0;
         node.zRotation = angle;
     }
     
-    b2Vec2* v = _world->GetParticlePositionBuffer();
-    void** userdata = _world->GetParticleUserDataBuffer();
-    uint32* flags = _world->GetParticleFlagsBuffer();
-    for (int i = 0; i < _world->GetParticleCount(); ++i, ++v, ++flags, ++userdata) {
+    b2Vec2* v = _particleSystem->GetPositionBuffer();
+    void** userdata = _particleSystem->GetUserDataBuffer();
+    for (uint32 i = 0; i < _particleSystem->GetParticleCount(); ++i, ++v, ++userdata) {
         const bool is_remove = v->y < 0;
         SKNode* node = (__bridge SKNode*) *userdata;
         if (is_remove) {
-            *flags |= b2_zombieParticle;
+            _particleSystem->SetParticleFlags(i, b2_zombieParticle);
             [node removeFromParent];
         } else {
             node.position = CGPointMake(v->x * DISPLAY_SCALE, v->y * DISPLAY_SCALE);
