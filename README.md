@@ -1,6 +1,10 @@
 liquidfun-ios-sample
 ====================
 
+Swift version is available at https://github.com/safx/liquidfun-swift-sample
+
+## Screenshot
+
 ![](liquidfun.gif)
 
 ## How to build
